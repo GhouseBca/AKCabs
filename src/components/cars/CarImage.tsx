@@ -5,6 +5,28 @@ import { CarFront } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+function isRenderableUrl(value: string | null | undefined): value is string {
+  if (!value) {
+    return false;
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed === "/") {
+    return false;
+  }
+  if (trimmed.startsWith("/")) {
+    return !trimmed.startsWith("//");
+  }
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return false;
+  }
+  try {
+    new URL(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 type CarImageProps = {
   /** Image source. Empty or missing values render the placeholder. */
   src?: string | null;
@@ -31,7 +53,7 @@ function CarImage({
   priority = false,
 }: CarImageProps) {
   const [failed, setFailed] = useState(false);
-  const showPlaceholder = !src || failed;
+  const showPlaceholder = failed || !isRenderableUrl(src);
 
   return (
     <div

@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "*.convex.cloud" },
       { protocol: "https", hostname: "*.convex.site" },
+      { protocol: "https", hostname: "terrific-firefly-636.convex.cloud" },
     ],
   },
   turbopack: {
