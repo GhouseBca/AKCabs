@@ -27,23 +27,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { cn, formatPrice } from "@/lib/utils";
 
-type PricingManagerProps = {
-  token: string;
-};
-
-function PricingManager({ token }: PricingManagerProps) {
+function PricingManager() {
   return (
     <ErrorBoundary
       title="Couldn't load pricing"
       description="There was a problem loading your pricing plans. Please try again."
     >
-      <PricingManagerContent token={token} />
+      <PricingManagerContent />
     </ErrorBoundary>
   );
 }
 
-function PricingManagerContent({ token }: PricingManagerProps) {
-  const pricing = useQuery(api.pricing.getPricing, { token }) as
+function PricingManagerContent() {
+  const pricing = useQuery(api.pricing.getPricing, {}) as
     | PricingRecord[]
     | undefined;
   const deletePricing = useMutation(api.pricing.deletePricing);
@@ -70,7 +66,6 @@ function PricingManagerContent({ token }: PricingManagerProps) {
     setBusyId(record._id);
     try {
       await updatePricing({
-        token,
         id: record._id,
         active: !record.active,
       });
@@ -99,7 +94,7 @@ function PricingManagerContent({ token }: PricingManagerProps) {
     next.splice(target, 0, moved);
     setBusyId(moved._id);
     try {
-      await reorderPricing({ token, ids: next.map((row) => row._id) });
+      await reorderPricing({ ids: next.map((row) => row._id) });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Could not reorder pricing.",
@@ -115,7 +110,7 @@ function PricingManagerContent({ token }: PricingManagerProps) {
     }
     setDeleting(true);
     try {
-      await deletePricing({ token, id: deleteTarget._id });
+      await deletePricing({ id: deleteTarget._id });
       toast.success("Pricing deleted.");
       setDeleteTarget(null);
     } catch (error) {
@@ -248,7 +243,6 @@ function PricingManagerContent({ token }: PricingManagerProps) {
       )}
 
       <PricingFormSheet
-        token={token}
         open={formOpen}
         onOpenChange={setFormOpen}
         record={editing}
@@ -277,4 +271,3 @@ function PricingManagerContent({ token }: PricingManagerProps) {
 }
 
 export { PricingManager };
-export type { PricingManagerProps };

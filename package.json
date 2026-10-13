@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@convex-dev/workos": "^0.0.3",
+    "@workos-inc/authkit-nextjs": "^4.4.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "convex": "^1.46.0",

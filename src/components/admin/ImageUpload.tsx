@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 type ImageUploadProps = {
-  token: string;
   value: string[];
   onChange: (value: string[]) => void;
   max?: number;
@@ -20,7 +19,6 @@ type ImageUploadProps = {
 };
 
 function ImageUpload({
-  token,
   value,
   onChange,
   max = 1,
@@ -61,7 +59,7 @@ function ImageUpload({
           continue;
         }
 
-        const uploadUrl = await generateUploadUrl({ token });
+        const uploadUrl = await generateUploadUrl({});
         const response = await fetch(uploadUrl, {
           method: "POST",
           headers: { "Content-Type": file.type },

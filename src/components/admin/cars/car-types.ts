@@ -1,6 +1,6 @@
 import type { Doc } from "../../../../convex/_generated/dataModel";
 
-export type CarRecord = Doc<"cars">;
+export type CarRecord = Doc<"cars"> & { imageUrl?: string | null };
 
 export const FUEL_TYPES = [
   "Petrol",

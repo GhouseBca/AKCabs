@@ -134,9 +134,9 @@ export const getActivePricing = queryGeneric({
  * Admin: every pricing entry including inactive ones, ordered for display.
  */
 export const getPricing = queryGeneric({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    await requireAdmin(ctx, token);
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("pricing")
       .withIndex("by_sort_order")
@@ -146,9 +146,9 @@ export const getPricing = queryGeneric({
 });
 
 export const createPricing = mutationGeneric({
-  args: { token: v.string(), ...pricingFields },
-  handler: async (ctx, { token, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { ...pricingFields },
+  handler: async (ctx, input) => {
+    await requireAdmin(ctx);
 
     const fields = sanitizePricingFields(input);
     const now = Date.now();
@@ -171,9 +171,9 @@ export const createPricing = mutationGeneric({
 });
 
 export const updatePricing = mutationGeneric({
-  args: { token: v.string(), id: v.id("pricing"), ...pricingUpdateFields },
-  handler: async (ctx, { token, id, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("pricing"), ...pricingUpdateFields },
+  handler: async (ctx, { id, ...input }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("pricing", id);
     if (!existing) {
@@ -191,9 +191,9 @@ export const updatePricing = mutationGeneric({
 });
 
 export const deletePricing = mutationGeneric({
-  args: { token: v.string(), id: v.id("pricing") },
-  handler: async (ctx, { token, id }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("pricing") },
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("pricing", id);
     if (!existing) {
@@ -210,9 +210,9 @@ export const deletePricing = mutationGeneric({
  * desired order. sortOrder is rewritten to match the array position.
  */
 export const reorderPricing = mutationGeneric({
-  args: { token: v.string(), ids: v.array(v.id("pricing")) },
-  handler: async (ctx, { token, ids }) => {
-    await requireAdmin(ctx, token);
+  args: { ids: v.array(v.id("pricing")) },
+  handler: async (ctx, { ids }) => {
+    await requireAdmin(ctx);
     assertUniqueIdList(ids, "Pricing");
 
     const now = Date.now();

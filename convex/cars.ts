@@ -1,6 +1,10 @@
 import { queryGeneric, mutationGeneric } from "convex/server";
 import { v, type GenericId } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 import { requireAdmin } from "./auth";
+
+const HTTP_URL = /^https?:\/\//i;
 
 const MAX_MEDIA_REF_LENGTH = 2048;
 const MAX_ADDITIONAL_IMAGES = 20;
@@ -260,7 +264,8 @@ export const getAvailableCars = queryGeneric({
       .query("cars")
       .withIndex("by_available", (q) => q.eq("available", true))
       .collect();
-    return cars.sort((a, b) => a.sortOrder - b.sortOrder);
+    const sorted = cars.sort((a, b) => a.sortOrder - b.sortOrder);
+    return Promise.all(sorted.map((car) => withImageUrl(ctx, car)));
   },
 });
 
@@ -270,7 +275,11 @@ export const getAvailableCars = queryGeneric({
 export const getCarById = queryGeneric({
   args: { id: v.id("cars") },
   handler: async (ctx, { id }) => {
-    return await ctx.db.get("cars", id);
+    const car = await ctx.db.get("cars", id);
+    if (!car) {
+      return null;
+    }
+    return withImageUrl(ctx, car);
   },
 });
 
@@ -278,14 +287,15 @@ export const getCarById = queryGeneric({
  * Admin: every car including unavailable ones, ordered for display.
  */
 export const getCars = queryGeneric({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    await requireAdmin(ctx, token);
-    return await ctx.db
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const cars = await ctx.db
       .query("cars")
       .withIndex("by_sort_order")
       .order("asc")
       .collect();
+    return Promise.all(cars.map((car) => withImageUrl(ctx, car)));
   },
 });
 
@@ -294,9 +304,9 @@ export const getCars = queryGeneric({
  * file to. The POST response contains the storage id to save on a car.
  */
 export const generateUploadUrl = mutationGeneric({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    await requireAdmin(ctx, token);
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -327,10 +337,40 @@ export const getImageUrls = queryGeneric({
   },
 });
 
+/**
+ * Resolves a car's `image` field (a Convex storage id or a full URL) into a
+ * displayable URL. Returns null when there is no usable image.
+ */
+async function resolveImageUrl(
+  ctx: QueryCtx,
+  image: string,
+): Promise<string | null> {
+  const trimmed = image.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (HTTP_URL.test(trimmed)) {
+    return trimmed;
+  }
+  try {
+    return (await ctx.storage.getUrl(trimmed as GenericId<"_storage">)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Attaches `imageUrl` to a car document, keeping the original `image` field. */
+async function withImageUrl(
+  ctx: QueryCtx,
+  car: Doc<"cars">,
+): Promise<Doc<"cars"> & { imageUrl: string | null }> {
+  return { ...car, imageUrl: await resolveImageUrl(ctx, car.image) };
+}
+
 export const createCar = mutationGeneric({
-  args: { token: v.string(), ...carFields },
-  handler: async (ctx, { token, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { ...carFields },
+  handler: async (ctx, input) => {
+    await requireAdmin(ctx);
 
     const fields = sanitizeCarFields(input);
     const now = Date.now();
@@ -353,9 +393,9 @@ export const createCar = mutationGeneric({
 });
 
 export const updateCar = mutationGeneric({
-  args: { token: v.string(), id: v.id("cars"), ...carUpdateFields },
-  handler: async (ctx, { token, id, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("cars"), ...carUpdateFields },
+  handler: async (ctx, { id, ...input }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("cars", id);
     if (!existing) {
@@ -373,9 +413,9 @@ export const updateCar = mutationGeneric({
 });
 
 export const deleteCar = mutationGeneric({
-  args: { token: v.string(), id: v.id("cars") },
-  handler: async (ctx, { token, id }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("cars") },
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("cars", id);
     if (!existing) {
@@ -389,12 +429,11 @@ export const deleteCar = mutationGeneric({
 
 export const toggleCarAvailability = mutationGeneric({
   args: {
-    token: v.string(),
     id: v.id("cars"),
     available: v.optional(v.boolean()),
   },
-  handler: async (ctx, { token, id, available }) => {
-    await requireAdmin(ctx, token);
+  handler: async (ctx, { id, available }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("cars", id);
     if (!existing) {
@@ -412,9 +451,9 @@ export const toggleCarAvailability = mutationGeneric({
  * order. sortOrder is rewritten to match the array position.
  */
 export const reorderCars = mutationGeneric({
-  args: { token: v.string(), ids: v.array(v.id("cars")) },
-  handler: async (ctx, { token, ids }) => {
-    await requireAdmin(ctx, token);
+  args: { ids: v.array(v.id("cars")) },
+  handler: async (ctx, { ids }) => {
+    await requireAdmin(ctx);
     assertUniqueIdList(ids, "Car");
 
     const now = Date.now();

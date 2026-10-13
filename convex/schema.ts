@@ -104,20 +104,11 @@ export default defineSchema({
   admins: defineTable({
     name: v.string(),
     email: v.string(),
-    passwordHash: v.string(),
+    // Legacy field from the previous custom login; unused with WorkOS.
+    passwordHash: v.optional(v.string()),
     role: adminRole,
     active: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_email", ["email"]),
-
-  sessions: defineTable({
-    adminId: v.id("admins"),
-    token: v.string(),
-    expiresAt: v.number(),
-    createdAt: v.number(),
-  })
-    .index("by_token", ["token"])
-    .index("by_admin", ["adminId"])
-    .index("by_created_at", ["createdAt"]),
 });

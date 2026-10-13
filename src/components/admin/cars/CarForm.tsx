@@ -31,19 +31,17 @@ import {
 import { parseOptionalNumber } from "@/lib/utils";
 
 type CarFormSheetProps = {
-  token: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   car: CarRecord | null;
 };
 
-function CarFormSheet({ token, open, onOpenChange, car }: CarFormSheetProps) {
+function CarFormSheet({ open, onOpenChange, car }: CarFormSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 p-0 sm:max-w-2xl">
         <CarFormBody
           key={`${car?._id ?? "new"}:${open ? "open" : "closed"}`}
-          token={token}
           car={car}
           onClose={() => onOpenChange(false)}
         />
@@ -53,12 +51,11 @@ function CarFormSheet({ token, open, onOpenChange, car }: CarFormSheetProps) {
 }
 
 type CarFormBodyProps = {
-  token: string;
   car: CarRecord | null;
   onClose: () => void;
 };
 
-function CarFormBody({ token, car, onClose }: CarFormBodyProps) {
+function CarFormBody({ car, onClose }: CarFormBodyProps) {
   const createCar = useMutation(api.cars.createCar);
   const updateCar = useMutation(api.cars.updateCar);
   const [values, setValues] = useState<CarFormValues>(() =>
@@ -137,10 +134,10 @@ function CarFormBody({ token, car, onClose }: CarFormBodyProps) {
       };
 
       if (car) {
-        await updateCar({ token, id: car._id, ...payload });
+        await updateCar({ id: car._id, ...payload });
         toast.success("Car updated.");
       } else {
-        await createCar({ token, ...payload });
+        await createCar({ ...payload });
         toast.success("Car added.");
       }
       onClose();
@@ -308,7 +305,6 @@ function CarFormBody({ token, car, onClose }: CarFormBodyProps) {
             error={errors.image}
           >
             <ImageUpload
-              token={token}
               value={values.image ? [values.image] : []}
               onChange={(next) => setField("image", next[0] ?? "")}
               max={1}
@@ -322,7 +318,6 @@ function CarFormBody({ token, car, onClose }: CarFormBodyProps) {
             error={errors.additionalImages}
           >
             <ImageUpload
-              token={token}
               value={values.additionalImages}
               onChange={(next) => setField("additionalImages", next)}
               max={MAX_ADDITIONAL_IMAGES}

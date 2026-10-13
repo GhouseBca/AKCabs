@@ -12,11 +12,19 @@ import {
 
 export const metadata: Metadata = {
   title: "Admin Login",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function AdminLoginPage() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 p-4">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 p-4 focus:outline-none"
+    >
       <Link
         href="/"
         className="flex items-center gap-2 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -33,7 +41,8 @@ export default function AdminLoginPage() {
         <CardHeader>
           <CardTitle>Admin sign in</CardTitle>
           <CardDescription>
-            Sign in to manage cars, pricing, enquiries, and site settings.
+            Sign in with your WorkOS account to manage cars, pricing, enquiries,
+            and site settings.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -31,24 +31,17 @@ import {
 import { cn } from "@/lib/utils";
 
 type ServiceFormSheetProps = {
-  token: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   service: ServiceRecord | null;
 };
 
-function ServiceFormSheet({
-  token,
-  open,
-  onOpenChange,
-  service,
-}: ServiceFormSheetProps) {
+function ServiceFormSheet({ open, onOpenChange, service }: ServiceFormSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 p-0 sm:max-w-lg">
         <ServiceFormBody
           key={`${service?._id ?? "new"}:${open ? "open" : "closed"}`}
-          token={token}
           service={service}
           onClose={() => onOpenChange(false)}
         />
@@ -58,12 +51,11 @@ function ServiceFormSheet({
 }
 
 type ServiceFormBodyProps = {
-  token: string;
   service: ServiceRecord | null;
   onClose: () => void;
 };
 
-function ServiceFormBody({ token, service, onClose }: ServiceFormBodyProps) {
+function ServiceFormBody({ service, onClose }: ServiceFormBodyProps) {
   const createService = useMutation(api.services.createService);
   const updateService = useMutation(api.services.updateService);
   const [values, setValues] = useState<ServiceFormValues>(() =>
@@ -106,10 +98,10 @@ function ServiceFormBody({ token, service, onClose }: ServiceFormBodyProps) {
       };
 
       if (service) {
-        await updateService({ token, id: service._id, ...payload });
+        await updateService({ id: service._id, ...payload });
         toast.success("Service updated.");
       } else {
-        await createService({ token, ...payload });
+        await createService({ ...payload });
         toast.success("Service added.");
       }
       onClose();

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useConvexAuth } from "convex/react";
 import { CarFront, ExternalLink, Menu } from "lucide-react";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { LogoutButton } from "@/components/admin/LogoutButton";
+import { Toaster } from "@/components/ui/sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getAdminNavItem } from "@/components/admin/nav";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -42,7 +45,7 @@ function SidebarFooter({ admin }: { admin: AdminInfo }) {
       <Link
         href="/"
         target="_blank"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ExternalLink className="size-4" aria-hidden="true" />
         View site
@@ -54,6 +57,38 @@ function SidebarFooter({ admin }: { admin: AdminInfo }) {
       <LogoutButton className="w-full" />
     </div>
   );
+}
+
+function AdminAuthGate({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setReady(true);
+    } else if (!isLoading) {
+      router.replace("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  // Once authenticated, keep the content mounted so a later token refresh
+  // (brief isLoading) does not unmount it and re-run the admin queries.
+  if (ready || isAuthenticated) {
+    return <>{children}</>;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3" aria-busy="true" aria-live="polite">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Skeleton key={index} className="h-24 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function AdminShell({
@@ -106,7 +141,10 @@ function AdminShell({
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1 p-4 focus:outline-none lg:p-6">
+          <AdminAuthGate>{children}</AdminAuthGate>
+        </main>
+        <Toaster />
       </div>
     </div>
   );

@@ -20,14 +20,14 @@ function MobileActionBarView({
           href={whatsappLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-14 items-center justify-center gap-2 bg-primary text-sm font-medium text-primary-foreground"
+          className="flex h-14 items-center justify-center gap-2 bg-primary text-sm font-medium text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           <MessageCircle className="size-4" aria-hidden="true" />
           WhatsApp
         </a>
         <a
           href={phoneLink}
-          className="flex h-14 items-center justify-center gap-2 border-l border-border text-sm font-medium"
+          className="flex h-14 items-center justify-center gap-2 border-l border-border text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           <Phone className="size-4" aria-hidden="true" />
           Call

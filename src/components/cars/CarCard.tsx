@@ -23,7 +23,7 @@ type Car = {
   name: string;
   model: string;
   year?: number;
-  image: string;
+  imageUrl?: string | null;
   seatingCapacity: number;
   acAvailable: boolean;
   fuelType: string;
@@ -75,7 +75,7 @@ function CarCard({
     <article className="flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
       <div className="relative">
         <CarImage
-          src={car.image}
+          src={car.imageUrl}
           alt={`${car.name} available for booking with AK Cabs`}
         />
         <Badge

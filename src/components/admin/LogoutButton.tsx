@@ -1,22 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function LogoutButton({ className }: { className?: string }) {
-  const router = useRouter();
+  const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
     setLoading(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await signOut({ returnTo: "/admin/login" });
     } finally {
-      router.push("/admin/login");
-      router.refresh();
+      setLoading(false);
     }
   }
 

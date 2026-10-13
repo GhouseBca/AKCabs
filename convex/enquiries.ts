@@ -115,12 +115,11 @@ export const createEnquiry = mutationGeneric({
  */
 export const getEnquiries = queryGeneric({
   args: {
-    token: v.string(),
     status: v.optional(enquiryStatus),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { token, status, limit }) => {
-    await requireAdmin(ctx, token);
+  handler: async (ctx, { status, limit }) => {
+    await requireAdmin(ctx);
     const take = cleanLimit(limit);
 
     if (status) {
@@ -141,12 +140,11 @@ export const getEnquiries = queryGeneric({
 
 export const updateEnquiryStatus = mutationGeneric({
   args: {
-    token: v.string(),
     id: v.id("enquiries"),
     status: enquiryStatus,
   },
-  handler: async (ctx, { token, id, status }) => {
-    await requireAdmin(ctx, token);
+  handler: async (ctx, { id, status }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("enquiries", id);
     if (!existing) {
@@ -159,9 +157,9 @@ export const updateEnquiryStatus = mutationGeneric({
 });
 
 export const deleteEnquiry = mutationGeneric({
-  args: { token: v.string(), id: v.id("enquiries") },
-  handler: async (ctx, { token, id }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("enquiries") },
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("enquiries", id);
     if (!existing) {
@@ -177,9 +175,9 @@ export const deleteEnquiry = mutationGeneric({
  * Admin: aggregate counts for the dashboard.
  */
 export const getDashboardStats = queryGeneric({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    await requireAdmin(ctx, token);
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
 
     const [enquiries, cars, pricing, services] = await Promise.all([
       ctx.db.query("enquiries").collect(),

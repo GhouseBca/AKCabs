@@ -224,9 +224,9 @@ export const getBusinessSettings = queryGeneric({
 });
 
 export const updateBusinessSettings = mutationGeneric({
-  args: { token: v.string(), ...settingsUpdateFields },
-  handler: async (ctx, { token, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { ...settingsUpdateFields },
+  handler: async (ctx, input) => {
+    await requireAdmin(ctx);
 
     const fields = sanitizeSettingsFields(input);
     if (Object.keys(fields).length === 0) {

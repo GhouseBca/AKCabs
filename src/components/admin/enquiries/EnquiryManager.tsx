@@ -35,28 +35,24 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, formatDateTime } from "@/lib/utils";
 
-type EnquiryManagerProps = {
-  token: string;
-};
-
 type StatusFilter = "all" | EnquiryStatus;
 
-function EnquiryManager({ token }: EnquiryManagerProps) {
+function EnquiryManager() {
   return (
     <ErrorBoundary
       title="Couldn't load enquiries"
       description="There was a problem loading customer enquiries. Please try again."
     >
-      <EnquiryManagerContent token={token} />
+      <EnquiryManagerContent />
     </ErrorBoundary>
   );
 }
 
-function EnquiryManagerContent({ token }: EnquiryManagerProps) {
+function EnquiryManagerContent() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const enquiries = useQuery(
     api.enquiries.getEnquiries,
-    statusFilter === "all" ? { token } : { token, status: statusFilter },
+    statusFilter === "all" ? {} : { status: statusFilter },
   ) as EnquiryRecord[] | undefined;
 
   const updateStatus = useMutation(api.enquiries.updateEnquiryStatus);
@@ -73,7 +69,7 @@ function EnquiryManagerContent({ token }: EnquiryManagerProps) {
     }
     setBusyId(enquiry._id);
     try {
-      await updateStatus({ token, id: enquiry._id, status });
+      await updateStatus({ id: enquiry._id, status });
       toast.success(`Marked as ${ENQUIRY_STATUS_LABELS[status].toLowerCase()}.`);
     } catch (error) {
       toast.error(
@@ -90,7 +86,7 @@ function EnquiryManagerContent({ token }: EnquiryManagerProps) {
     }
     setDeleting(true);
     try {
-      await deleteEnquiry({ token, id: deleteTarget._id });
+      await deleteEnquiry({ id: deleteTarget._id });
       toast.success("Enquiry deleted.");
       setDeleteTarget(null);
     } catch (error) {
@@ -331,4 +327,3 @@ function Th({
 }
 
 export { EnquiryManager };
-export type { EnquiryManagerProps };

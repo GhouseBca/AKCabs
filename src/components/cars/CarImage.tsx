@@ -27,6 +27,10 @@ function isRenderableUrl(value: string | null | undefined): value is string {
   }
 }
 
+function isLocalDevUrl(value: string): boolean {
+  return value.startsWith("http://127.0.0.1") || value.startsWith("http://localhost");
+}
+
 type CarImageProps = {
   /** Image source. Empty or missing values render the placeholder. */
   src?: string | null;
@@ -82,6 +86,7 @@ function CarImage({
           fill
           sizes={sizes}
           priority={priority}
+          unoptimized={isLocalDevUrl(src)}
           onError={() => setFailed(true)}
           className={cn("object-cover", imageClassName)}
         />

@@ -18,7 +18,6 @@ import { CarFormSheet } from "@/components/admin/cars/CarForm";
 import {
   type CarRecord,
 } from "@/components/admin/cars/car-types";
-import { useImageUrls } from "@/components/admin/useImageUrls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -27,25 +26,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { cn, formatPrice } from "@/lib/utils";
 
-type CarsManagerProps = {
-  token: string;
-};
-
-function CarsManager({ token }: CarsManagerProps) {
+function CarsManager() {
   return (
     <ErrorBoundary
       title="Couldn't load cars"
       description="There was a problem loading your fleet. Please try again."
     >
-      <CarsManagerContent token={token} />
+      <CarsManagerContent />
     </ErrorBoundary>
   );
 }
 
-function CarsManagerContent({ token }: CarsManagerProps) {
-  const cars = useQuery(api.cars.getCars, { token }) as
-    | CarRecord[]
-    | undefined;
+function CarsManagerContent() {
+  const cars = useQuery(api.cars.getCars, {}) as CarRecord[] | undefined;
   const deleteCar = useMutation(api.cars.deleteCar);
   const toggleCarAvailability = useMutation(api.cars.toggleCarAvailability);
   const reorderCars = useMutation(api.cars.reorderCars);
@@ -55,8 +48,6 @@ function CarsManagerContent({ token }: CarsManagerProps) {
   const [deleteTarget, setDeleteTarget] = useState<CarRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
-
-  const { resolve } = useImageUrls((cars ?? []).map((car) => car.image));
 
   function openAdd() {
     setEditing(null);
@@ -72,7 +63,6 @@ function CarsManagerContent({ token }: CarsManagerProps) {
     setBusyId(car._id);
     try {
       await toggleCarAvailability({
-        token,
         id: car._id,
         available: !car.available,
       });
@@ -103,7 +93,7 @@ function CarsManagerContent({ token }: CarsManagerProps) {
     next.splice(target, 0, moved);
     setBusyId(moved._id);
     try {
-      await reorderCars({ token, ids: next.map((car) => car._id) });
+      await reorderCars({ ids: next.map((car) => car._id) });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Could not reorder cars.",
@@ -119,7 +109,7 @@ function CarsManagerContent({ token }: CarsManagerProps) {
     }
     setDeleting(true);
     try {
-      await deleteCar({ token, id: deleteTarget._id });
+      await deleteCar({ id: deleteTarget._id });
       toast.success("Car deleted.");
       setDeleteTarget(null);
     } catch (error) {
@@ -176,19 +166,16 @@ function CarsManagerContent({ token }: CarsManagerProps) {
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                    {(() => {
-                      const src = resolve(car.image);
-                      return src ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={src}
-                          alt={car.name}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <CarFront className="size-6 text-muted-foreground" />
-                      );
-                    })()}
+                    {car.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={car.imageUrl}
+                        alt={car.name}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <CarFront className="size-6 text-muted-foreground" />
+                    )}
                   </div>
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
@@ -266,7 +253,6 @@ function CarsManagerContent({ token }: CarsManagerProps) {
       )}
 
       <CarFormSheet
-        token={token}
         open={formOpen}
         onOpenChange={setFormOpen}
         car={editing}
@@ -295,4 +281,3 @@ function CarsManagerContent({ token }: CarsManagerProps) {
 }
 
 export { CarsManager };
-export type { CarsManagerProps };

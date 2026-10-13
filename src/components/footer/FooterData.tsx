@@ -30,7 +30,10 @@ export function FooterData() {
         <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
           {serviceTitles.slice(0, 6).map((title) => (
             <li key={title}>
-              <Link href="/#services" className="hover:text-foreground">
+              <Link
+                href="/#services"
+                className="rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
                 {title}
               </Link>
             </li>
@@ -46,7 +49,7 @@ export function FooterData() {
               href={getWhatsAppLink(settings)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <MessageCircle className="size-4" aria-hidden="true" />
               WhatsApp
@@ -55,7 +58,7 @@ export function FooterData() {
           <li>
             <a
               href={getPhoneLink(settings)}
-              className="inline-flex items-center gap-2 hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <Phone className="size-4" aria-hidden="true" />
               {phone || "Call us"}
@@ -65,7 +68,7 @@ export function FooterData() {
             <li>
               <a
                 href={`mailto:${email}`}
-                className="inline-flex items-center gap-2 hover:text-foreground"
+                className="inline-flex items-center gap-2 rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <Mail className="size-4" aria-hidden="true" />
                 {email}

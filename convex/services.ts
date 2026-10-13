@@ -101,9 +101,9 @@ export const getServices = queryGeneric({
  * Admin: every service including inactive ones, ordered for display.
  */
 export const getAllServices = queryGeneric({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    await requireAdmin(ctx, token);
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("services")
       .withIndex("by_sort_order")
@@ -113,9 +113,9 @@ export const getAllServices = queryGeneric({
 });
 
 export const createService = mutationGeneric({
-  args: { token: v.string(), ...serviceFields },
-  handler: async (ctx, { token, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { ...serviceFields },
+  handler: async (ctx, input) => {
+    await requireAdmin(ctx);
 
     const fields = sanitizeServiceFields(input);
     if (fields.active === undefined) {
@@ -135,9 +135,9 @@ export const createService = mutationGeneric({
 });
 
 export const updateService = mutationGeneric({
-  args: { token: v.string(), id: v.id("services"), ...serviceUpdateFields },
-  handler: async (ctx, { token, id, ...input }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("services"), ...serviceUpdateFields },
+  handler: async (ctx, { id, ...input }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get("services", id);
     if (!existing) {
@@ -155,9 +155,9 @@ export const updateService = mutationGeneric({
 });
 
 export const deleteService = mutationGeneric({
-  args: { token: v.string(), id: v.id("services") },
-  handler: async (ctx, { token, id }) => {
-    await requireAdmin(ctx, token);
+  args: { id: v.id("services") },
+  handler: async (ctx, { id }) => {
+    await requireAdmin(ctx);
 
     const existing = await ctx.db.get(id);
     if (!existing) {
@@ -174,9 +174,9 @@ export const deleteService = mutationGeneric({
  * order. sortOrder is rewritten to match the array position.
  */
 export const reorderServices = mutationGeneric({
-  args: { token: v.string(), ids: v.array(v.id("services")) },
-  handler: async (ctx, { token, ids }) => {
-    await requireAdmin(ctx, token);
+  args: { ids: v.array(v.id("services")) },
+  handler: async (ctx, { ids }) => {
+    await requireAdmin(ctx);
     assertUniqueIdList(ids, "Service");
 
     for (const id of ids) {

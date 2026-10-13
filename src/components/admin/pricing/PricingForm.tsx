@@ -37,14 +37,12 @@ import {
 import { parseOptionalNumber } from "@/lib/utils";
 
 type PricingFormSheetProps = {
-  token: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   record: PricingRecord | null;
 };
 
 function PricingFormSheet({
-  token,
   open,
   onOpenChange,
   record,
@@ -54,7 +52,6 @@ function PricingFormSheet({
       <SheetContent className="w-full gap-0 p-0 sm:max-w-lg">
         <PricingFormBody
           key={`${record?._id ?? "new"}:${open ? "open" : "closed"}`}
-          token={token}
           record={record}
           onClose={() => onOpenChange(false)}
         />
@@ -64,12 +61,11 @@ function PricingFormSheet({
 }
 
 type PricingFormBodyProps = {
-  token: string;
   record: PricingRecord | null;
   onClose: () => void;
 };
 
-function PricingFormBody({ token, record, onClose }: PricingFormBodyProps) {
+function PricingFormBody({ record, onClose }: PricingFormBodyProps) {
   const createPricing = useMutation(api.pricing.createPricing);
   const updatePricing = useMutation(api.pricing.updatePricing);
   const [values, setValues] = useState<PricingFormValues>(() =>
@@ -115,10 +111,10 @@ function PricingFormBody({ token, record, onClose }: PricingFormBodyProps) {
       };
 
       if (record) {
-        await updatePricing({ token, id: record._id, ...payload });
+        await updatePricing({ id: record._id, ...payload });
         toast.success("Pricing updated.");
       } else {
-        await createPricing({ token, ...payload });
+        await createPricing({ ...payload });
         toast.success("Pricing added.");
       }
       onClose();

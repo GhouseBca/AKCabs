@@ -27,22 +27,18 @@ import {
   type SettingsValues,
 } from "@/components/admin/settings/settings-types";
 
-type SettingsFormProps = {
-  token: string;
-};
-
-function SettingsForm({ token }: SettingsFormProps) {
+function SettingsForm() {
   return (
     <ErrorBoundary
       title="Couldn't load settings"
       description="There was a problem loading your business settings. Please try again."
     >
-      <SettingsLoader token={token} />
+      <SettingsLoader />
     </ErrorBoundary>
   );
 }
 
-function SettingsLoader({ token }: SettingsFormProps) {
+function SettingsLoader() {
   const settings = useQuery(api.settings.getBusinessSettings) as
     | BusinessSettings
     | null
@@ -58,15 +54,14 @@ function SettingsLoader({ token }: SettingsFormProps) {
     );
   }
 
-  return <SettingsFormBody token={token} initial={settings} />;
+  return <SettingsFormBody initial={settings} />;
 }
 
 type SettingsFormBodyProps = {
-  token: string;
   initial: BusinessSettings | null;
 };
 
-function SettingsFormBody({ token, initial }: SettingsFormBodyProps) {
+function SettingsFormBody({ initial }: SettingsFormBodyProps) {
   const updateSettings = useMutation(api.settings.updateBusinessSettings);
   const [values, setValues] = useState<SettingsValues>(() =>
     settingsToForm(initial),
@@ -101,7 +96,6 @@ function SettingsFormBody({ token, initial }: SettingsFormBodyProps) {
     setSaving(true);
     try {
       await updateSettings({
-        token,
         name: values.name.trim(),
         tagline: values.tagline.trim(),
         phone: values.phone.trim(),
@@ -339,7 +333,6 @@ function SettingsFormBody({ token, initial }: SettingsFormBodyProps) {
             hint="Shown beside the headline. Leave empty to use the default."
           >
             <ImageUpload
-              token={token}
               value={values.heroImage ? [values.heroImage] : []}
               onChange={(next) => setField("heroImage", next[0] ?? "")}
               max={1}
@@ -376,4 +369,3 @@ function SettingsFormBody({ token, initial }: SettingsFormBodyProps) {
 }
 
 export { SettingsForm };
-export type { SettingsFormProps };

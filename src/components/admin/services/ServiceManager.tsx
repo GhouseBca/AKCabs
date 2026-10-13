@@ -24,23 +24,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
-type ServiceManagerProps = {
-  token: string;
-};
-
-function ServiceManager({ token }: ServiceManagerProps) {
+function ServiceManager() {
   return (
     <ErrorBoundary
       title="Couldn't load services"
       description="There was a problem loading your services. Please try again."
     >
-      <ServiceManagerContent token={token} />
+      <ServiceManagerContent />
     </ErrorBoundary>
   );
 }
 
-function ServiceManagerContent({ token }: ServiceManagerProps) {
-  const services = useQuery(api.services.getAllServices, { token }) as
+function ServiceManagerContent() {
+  const services = useQuery(api.services.getAllServices, {}) as
     | ServiceRecord[]
     | undefined;
   const deleteService = useMutation(api.services.deleteService);
@@ -67,7 +63,6 @@ function ServiceManagerContent({ token }: ServiceManagerProps) {
     setBusyId(service._id);
     try {
       await updateService({
-        token,
         id: service._id,
         active: !service.active,
       });
@@ -96,7 +91,7 @@ function ServiceManagerContent({ token }: ServiceManagerProps) {
     next.splice(target, 0, moved);
     setBusyId(moved._id);
     try {
-      await reorderServices({ token, ids: next.map((row) => row._id) });
+      await reorderServices({ ids: next.map((row) => row._id) });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Could not reorder services.",
@@ -112,7 +107,7 @@ function ServiceManagerContent({ token }: ServiceManagerProps) {
     }
     setDeleting(true);
     try {
-      await deleteService({ token, id: deleteTarget._id });
+      await deleteService({ id: deleteTarget._id });
       toast.success("Service deleted.");
       setDeleteTarget(null);
     } catch (error) {
@@ -242,7 +237,6 @@ function ServiceManagerContent({ token }: ServiceManagerProps) {
       )}
 
       <ServiceFormSheet
-        token={token}
         open={formOpen}
         onOpenChange={setFormOpen}
         service={editing}
@@ -271,4 +265,3 @@ function ServiceManagerContent({ token }: ServiceManagerProps) {
 }
 
 export { ServiceManager };
-export type { ServiceManagerProps };

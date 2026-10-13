@@ -85,7 +85,7 @@ export function Navbar() {
                   <li key={link.href}>
                     <SheetClose
                       render={<Link href={link.href} />}
-                      className="block rounded-lg px-3 py-2 text-base font-medium text-foreground transition-colors hover:bg-muted"
+                      className="block rounded-lg px-3 py-2 text-base font-medium text-foreground transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       {link.label}
                     </SheetClose>

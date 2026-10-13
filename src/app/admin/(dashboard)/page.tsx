@@ -1,10 +1,11 @@
-import { redirect } from "next/navigation";
-import { anyApi } from "convex/server";
+import { connection } from "next/server";
+import { withAuth } from "@workos-inc/authkit-nextjs";
+import { api } from "../../../../convex/_generated/api";
 import { BellRing, Car, CarFront, Inbox, IndianRupee } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { ErrorState } from "@/components/ui/error-state";
-import { convexClient, getAdminSession } from "@/lib/auth";
+import { authedConvexClient } from "@/lib/auth";
 
 export const instant = false;
 
@@ -21,16 +22,17 @@ type DashboardStats = {
 };
 
 export default async function AdminDashboardPage() {
-  const session = await getAdminSession();
-  if (!session) {
-    redirect("/admin/login");
-  }
+  await connection();
+
+  const { accessToken } = await withAuth({ ensureSignedIn: true });
 
   let stats: DashboardStats | null = null;
   try {
-    stats = (await convexClient().query(anyApi.enquiries.getDashboardStats, {
-      token: session.token,
-    })) as DashboardStats;
+    const client = await authedConvexClient(accessToken);
+    stats = (await client.query(
+      api.enquiries.getDashboardStats,
+      {},
+    )) as DashboardStats;
   } catch {
     stats = null;
   }

@@ -1,12 +1,8 @@
-import { cookies } from "next/headers";
 import { ConvexHttpClient } from "convex/browser";
-import { anyApi } from "convex/server";
-import { AUTH_COOKIE } from "./auth/constants";
 
 export type AdminInfo = {
   name: string;
   email: string;
-  role: string;
 };
 
 export function getConvexUrl(): string {
@@ -21,28 +17,26 @@ export function convexClient(): ConvexHttpClient {
   return new ConvexHttpClient(getConvexUrl());
 }
 
-export type AdminSession = {
-  admin: AdminInfo;
-  token: string;
-};
-
-export async function getAdminSession(): Promise<AdminSession | null> {
-  const token = (await cookies()).get(AUTH_COOKIE)?.value;
-  if (!token) {
-    return null;
-  }
-  try {
-    const admin = await convexClient().query(anyApi.auth.me, { token });
-    if (!admin) {
-      return null;
-    }
-    return { admin, token };
-  } catch {
-    return null;
-  }
+export function toAdminInfo(user: {
+  firstName?: string | null;
+  lastName?: string | null;
+  email: string;
+}): AdminInfo {
+  const name =
+    [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
+    user.email;
+  return { name, email: user.email };
 }
 
-export async function getCurrentAdmin(): Promise<AdminInfo | null> {
-  const session = await getAdminSession();
-  return session?.admin ?? null;
+/**
+ * Returns a Convex client already authenticated as the signed-in WorkOS user,
+ * for server-side queries/mutations in Server Components and Route Handlers.
+ * Callers must have already ensured a session (e.g. `withAuth({ ensureSignedIn: true })`).
+ */
+export async function authedConvexClient(
+  accessToken: string,
+): Promise<ConvexHttpClient> {
+  const client = convexClient();
+  client.setAuth(accessToken);
+  return client;
 }

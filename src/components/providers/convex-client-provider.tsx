@@ -1,7 +1,13 @@
 "use client";
 
-import { ConvexProvider, ConvexReactClient } from "convex/react";
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
+import { ConvexReactClient } from "convex/react";
+import { ConvexProviderWithAuthKit } from "@convex-dev/workos";
+import {
+  AuthKitProvider,
+  useAccessToken,
+  useAuth,
+} from "@workos-inc/authkit-nextjs/components";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -15,6 +21,24 @@ const logger = {
   error: (...args: unknown[]) => console.error(...args),
 };
 
+// Bridges WorkOS AuthKit into the `useAuth` shape Convex expects. The user is
+// authenticated once AuthKit finishes loading, and the WorkOS access token is
+// the JWT Convex verifies (see convex/auth.config.ts).
+function useAuthFromAuthKit() {
+  const { user, loading: isLoading } = useAuth();
+  const { getAccessToken } = useAccessToken();
+
+  // Keep the token fetcher referentially stable. Convex re-registers auth
+  // whenever `fetchAccessToken` changes identity, which briefly resets its auth
+  // state and unmounts authenticated subtrees (the admin "blink").
+  const fetchAccessToken = useCallback(
+    async () => (await getAccessToken()) ?? null,
+    [getAccessToken],
+  );
+
+  return { isLoading, user, getAccessToken: fetchAccessToken };
+}
+
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   const [client] = useState(() =>
     convexUrl ? new ConvexReactClient(convexUrl, { logger }) : null,
@@ -24,5 +48,11 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  return <ConvexProvider client={client}>{children}</ConvexProvider>;
+  return (
+    <AuthKitProvider>
+      <ConvexProviderWithAuthKit client={client} useAuth={useAuthFromAuthKit}>
+        {children}
+      </ConvexProviderWithAuthKit>
+    </AuthKitProvider>
+  );
 }
