@@ -3,19 +3,20 @@ import { ServicesGridSkeleton } from "@/components/services/ServicesGridSkeleton
 import { ServicesList } from "@/components/services/ServicesList";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Section } from "@/components/ui/section";
+import { T } from "@/lib/i18n/T";
 
 export function Services() {
   return (
     <Section
       id="services"
-      eyebrow="What we offer"
-      title="Cab services for every journey"
-      description="From quick city rides to long outstation trips, AK Cabs covers every kind of travel with a clean, comfortable car and a courteous driver."
+      eyebrow={<T k="services.eyebrow" />}
+      title={<T k="services.title" />}
+      description={<T k="services.description" />}
     >
       <Suspense fallback={<ServicesGridSkeleton />}>
         <ErrorBoundary
-          title="We couldn't load our services"
-          description="Please refresh the page or try again in a moment."
+          title={<T k="services.errorTitle" />}
+          description={<T k="services.errorDescription" />}
         >
           <ServicesList />
         </ErrorBoundary>

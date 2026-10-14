@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { api } from "../../../../convex/_generated/api";
-import { BellRing, Car, CarFront, Inbox, IndianRupee } from "lucide-react";
+import { BellRing, Car, CarFront, Inbox, IndianRupee, Star } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { ErrorState } from "@/components/ui/error-state";
@@ -18,6 +18,12 @@ type DashboardStats = {
     contacted: number;
     completed: number;
     cancelled: number;
+  };
+  reviews: {
+    total: number;
+    pending: number;
+    approved: number;
+    hidden: number;
   };
 };
 
@@ -78,6 +84,13 @@ export default async function AdminDashboardPage() {
             value={stats.pricing.active}
             icon={IndianRupee}
             hint={`${stats.pricing.total} pricing ${stats.pricing.total === 1 ? "entry" : "entries"} in total`}
+          />
+          <StatCard
+            label="Pending reviews"
+            value={stats.reviews.pending}
+            icon={Star}
+            tone="amber"
+            hint={`${stats.reviews.total} ${stats.reviews.total === 1 ? "review" : "reviews"} in total`}
           />
         </div>
       ) : (

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Check,
   Fuel,
@@ -11,6 +13,8 @@ import {
 import { CarImage } from "@/components/cars/CarImage";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/en";
 import { cn, formatPrice } from "@/lib/utils";
 import {
   getCarEnquiryLink,
@@ -38,20 +42,27 @@ type Car = {
   available: boolean;
 };
 
-function lowestRate(car: Car): { amount: number; unit: string } | null {
-  const candidates: Array<{ amount: number; unit: string }> = [];
-  if (car.perKmRate) candidates.push({ amount: car.perKmRate, unit: "per km" });
+function lowestRate(
+  car: Car,
+): { amount: number; unitKey: TranslationKey } | null {
+  const candidates: Array<{ amount: number; unitKey: TranslationKey }> = [];
+  if (car.perKmRate) {
+    candidates.push({ amount: car.perKmRate, unitKey: "cars.unit.perKm" });
+  }
   if (car.localRate) {
-    candidates.push({ amount: car.localRate, unit: "local trip" });
+    candidates.push({ amount: car.localRate, unitKey: "cars.unit.local" });
   }
   if (car.outstationRate) {
-    candidates.push({ amount: car.outstationRate, unit: "outstation" });
+    candidates.push({
+      amount: car.outstationRate,
+      unitKey: "cars.unit.outstation",
+    });
   }
   if (car.airportRate) {
-    candidates.push({ amount: car.airportRate, unit: "airport" });
+    candidates.push({ amount: car.airportRate, unitKey: "cars.unit.airport" });
   }
   if (car.fullDayRate) {
-    candidates.push({ amount: car.fullDayRate, unit: "per day" });
+    candidates.push({ amount: car.fullDayRate, unitKey: "cars.unit.perDay" });
   }
   if (candidates.length === 0) {
     return null;
@@ -68,21 +79,24 @@ function CarCard({
   car: Car;
   settings?: ContactSettings | null;
 }) {
+  const { t, lang } = useLanguage();
   const rate = lowestRate(car);
   const features = car.features.slice(0, 4);
+  const isTamil = lang === "ta";
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow hover:shadow-md">
+    <article className="card-lift reveal group flex flex-col overflow-hidden">
       <div className="relative">
         <CarImage
           src={car.imageUrl}
-          alt={`${car.name} available for booking with AK Cabs`}
+          alt={t("cars.imageAlt", { name: car.name })}
+          imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.03]"
         />
         <Badge
           variant={car.available ? "default" : "destructive"}
           className="absolute top-3 left-3 shadow-sm"
         >
-          {car.available ? "Available" : "Not available"}
+          {car.available ? t("cars.available") : t("cars.notAvailable")}
         </Badge>
       </div>
 
@@ -99,7 +113,7 @@ function CarCard({
           <li>
             <Badge variant="secondary">
               <Users aria-hidden="true" />
-              {car.seatingCapacity} Seater
+              {t("cars.seater", { count: car.seatingCapacity })}
             </Badge>
           </li>
           <li>
@@ -109,7 +123,7 @@ function CarCard({
               ) : (
                 <Wind aria-hidden="true" />
               )}
-              {car.acAvailable ? "AC" : "Non-AC"}
+              {car.acAvailable ? t("cars.ac") : t("cars.nonAc")}
             </Badge>
           </li>
           <li>
@@ -140,13 +154,17 @@ function CarCard({
           </ul>
         ) : null}
 
-        <div className="mt-auto flex flex-col gap-4">
+        <div className="mt-auto flex flex-col gap-4 border-t border-border/80 pt-4">
           <div>
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {rate?.unit ? `Starting from (${rate.unit})` : "Pricing"}
+              {rate
+                ? t("cars.startingFrom", { unit: t(rate.unitKey) })
+                : t("cars.pricing")}
             </p>
-            <p className="font-heading text-2xl font-bold">
-              {formatPrice(rate?.amount)}
+            <p className="font-heading text-2xl font-bold text-primary">
+              {rate
+                ? formatPrice(rate.amount)
+                : t("common.contactForPrice")}
             </p>
           </div>
 
@@ -155,20 +173,25 @@ function CarCard({
               href={getCarEnquiryLink(car.name, settings)}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn(buttonVariants({ size: "lg" }), "flex-1")}
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "flex-1 shadow-sm shadow-brand/20",
+                isTamil && "text-xs",
+              )}
             >
               <MessageCircle aria-hidden="true" />
-              Book on WhatsApp
+              {t("cars.bookWhatsApp")}
             </a>
             <a
               href={getPhoneLink(settings)}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "flex-1",
+                isTamil && "text-xs",
               )}
             >
               <Phone aria-hidden="true" />
-              Call
+              {t("cars.call")}
             </a>
           </div>
         </div>

@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-noto-tamil);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
+  --font-heading: var(--font-geist-sans), var(--font-noto-tamil);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,6 +47,7 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-charcoal: var(--charcoal);
   --color-surface: var(--surface);
+  --color-brand-tint: var(--brand-tint);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -66,6 +67,7 @@
   --gold: #f5b301; /* yellow */
   --gold-foreground: #1f2421;
   --surface: #f4f7f4;
+  --brand-tint: #eef4ef; /* soft green-tinted section background */
 
   /* Semantic tokens */
   --background: var(--white);
@@ -115,6 +117,7 @@
   --secondary-foreground: #f4f7f4;
   --muted: #2b322c;
   --muted-foreground: #a7b3ab;
+  --brand-tint: #171d18;
   --accent: var(--gold);
   --accent-foreground: var(--charcoal);
   --destructive: #f87171;
@@ -146,8 +149,191 @@
   html {
     @apply font-sans;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  section[id] {
+    scroll-margin-top: 4.5rem;
+  }
   ::selection {
     background-color: color-mix(in srgb, var(--gold) 35%, transparent);
     color: var(--charcoal);
+  }
+}
+
+html.lang-ta,
+html.lang-ta body,
+html.lang-ta .font-sans {
+  font-family: var(--font-noto-tamil), var(--font-geist-sans), sans-serif;
+}
+
+html.lang-ta .font-heading,
+html.lang-ta h1,
+html.lang-ta h2,
+html.lang-ta h3 {
+  font-family: var(--font-noto-tamil), var(--font-geist-sans), sans-serif;
+}
+
+html.lang-ta body {
+  line-height: 1.75;
+}
+
+/* Customer reviews: auto-scrolling box (reviews section only). */
+@keyframes reviews-auto-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.reviews-scroll-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 2rem,
+    #000 calc(100% - 2rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 2rem,
+    #000 calc(100% - 2rem),
+    transparent 100%
+  );
+  scrollbar-width: none;
+}
+
+.reviews-scroll-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.reviews-scroll-track {
+  animation: reviews-auto-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+.reviews-scroll-box:hover .reviews-scroll-track,
+.reviews-scroll-box:focus-within .reviews-scroll-track {
+  animation-play-state: paused;
+}
+
+/* Touch devices: allow manual scrolling inside the box. */
+@media (pointer: coarse) {
+  .reviews-scroll-viewport {
+    overflow-y: auto;
+  }
+}
+
+/* Reduced motion: no auto-scroll, use a normal scroll area instead. */
+@media (prefers-reduced-motion: reduce) {
+  .reviews-scroll-viewport {
+    overflow-y: auto;
+  }
+
+  .reviews-scroll-track {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* Site polish: shared card surfaces + tasteful motion              */
+/* ---------------------------------------------------------------- */
+
+.card-static,
+.card-lift {
+  background-color: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+  border-radius: calc(var(--radius) * 1.4);
+  box-shadow:
+    0 1px 2px 0 rgb(15 61 34 / 0.04),
+    0 1px 1px 0 rgb(15 61 34 / 0.03);
+  transition:
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-lift:hover {
+    translate: 0 -3px;
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
+    box-shadow:
+      0 16px 32px -20px rgb(15 61 34 / 0.4),
+      0 2px 6px -2px rgb(15 61 34 / 0.06);
+  }
+}
+
+/* Fade/slide-in on scroll. Progressive enhancement: only browsers with
+   scroll-driven animation support get the effect; everyone else sees
+   content immediately, with no layout shift. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+/* Hero: one-shot entrance on page load. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .enter-up {
+    animation: enter-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .enter-up-delayed {
+    animation: enter-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  }
+}
+
+/* Reduced motion: keep content visible and still. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal,
+  .enter-up,
+  .enter-up-delayed {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .card-lift:hover,
+  .card-lift:hover :where(img) {
+    translate: none !important;
+    scale: none !important;
   }
 }

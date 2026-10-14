@@ -8,12 +8,14 @@ import { CarCard } from "@/components/cars/CarCard";
 import { CarGridSkeleton } from "@/components/cars/CarCardSkeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { getWhatsAppLink } from "@/lib/whatsapp";
 import { api } from "../../../convex/_generated/api";
 
 export function CarsList() {
   use(io());
+  const { t } = useLanguage();
   const cars = useQuery(api.cars.getAvailableCars);
   const settings = useQuery(api.settings.getBusinessSettings);
 
@@ -24,8 +26,8 @@ export function CarsList() {
   if (cars.length === 0) {
     return (
       <EmptyState
-        title="No cars available right now"
-        description="All of our cars are currently booked. Message us and we'll find the right vehicle for your trip."
+        title={t("cars.emptyTitle")}
+        description={t("cars.emptyDescription")}
         action={
           <a
             href={getWhatsAppLink(settings)}
@@ -34,7 +36,7 @@ export function CarsList() {
             className={cn(buttonVariants({ size: "lg" }))}
           >
             <MessageCircle aria-hidden="true" />
-            Check availability
+            {t("cars.checkAvailability")}
           </a>
         }
       />

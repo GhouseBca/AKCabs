@@ -1,22 +1,30 @@
+"use client";
+
 import Link from "next/link";
 import { CarFront } from "lucide-react";
 import { Suspense } from "react";
 import { FooterData } from "@/components/footer/FooterData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/en";
 
-const QUICK_LINKS = [
-  { label: "Home", href: "/#home" },
-  { label: "Services", href: "/#services" },
-  { label: "Cars", href: "/#cars" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Contact", href: "/#contact" },
+const QUICK_LINKS: ReadonlyArray<{ labelKey: TranslationKey; href: string }> = [
+  { labelKey: "nav.home", href: "/#home" },
+  { labelKey: "nav.services", href: "/#services" },
+  { labelKey: "nav.cars", href: "/#cars" },
+  { labelKey: "nav.pricing", href: "/#pricing" },
+  { labelKey: "nav.contact", href: "/#contact" },
 ];
 
 function FooterFallback() {
+  const { t } = useLanguage();
+
   return (
     <>
       <div>
-        <h2 className="font-heading text-sm font-semibold">Services</h2>
+        <h2 className="font-heading text-sm font-semibold text-foreground">
+          {t("footer.services")}
+        </h2>
         <div className="mt-3 flex flex-col gap-2">
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} className="h-4 w-32" />
@@ -24,7 +32,9 @@ function FooterFallback() {
         </div>
       </div>
       <div>
-        <h2 className="font-heading text-sm font-semibold">Contact</h2>
+        <h2 className="font-heading text-sm font-semibold text-foreground">
+          {t("footer.contact")}
+        </h2>
         <div className="mt-3 flex flex-col gap-2">
           {Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="h-4 w-40" />
@@ -36,6 +46,8 @@ function FooterFallback() {
 }
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -51,14 +63,15 @@ export function Footer() {
               AK Cabs
             </span>
           </Link>
-          <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-            Reliable cab service from Tirunelveli for local rides, outstation
-            trips, airport transfers, and memorable tours.
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+            {t("footer.tagline")}
           </p>
         </div>
 
-        <nav aria-label="Quick links">
-          <h2 className="font-heading text-sm font-semibold">Quick Links</h2>
+        <nav aria-label={t("footer.quickLinksAria")}>
+          <h2 className="font-heading text-sm font-semibold text-foreground">
+            {t("footer.quickLinks")}
+          </h2>
           <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
             {QUICK_LINKS.map((link) => (
               <li key={link.href}>
@@ -66,7 +79,7 @@ export function Footer() {
                   href={link.href}
                   className="rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               </li>
             ))}
@@ -80,7 +93,7 @@ export function Footer() {
 
       <div className="border-t border-border">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 text-center text-sm text-muted-foreground">
-          © 2026 AK Cabs Tirunelveli. All rights reserved.
+          {t("footer.copyright")}
         </div>
       </div>
     </footer>

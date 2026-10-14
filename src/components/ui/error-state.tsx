@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ErrorStateProps = {
-  title?: string;
+  title?: ReactNode;
   description?: ReactNode;
   /** Overrides the default alert icon. */
   icon?: ReactNode;

@@ -1,4 +1,7 @@
+"use client";
+
 import { MessageCircle, Phone } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 type MobileActionBarViewProps = {
   whatsappLink: string;
@@ -13,9 +16,11 @@ function MobileActionBarView({
   whatsappLink,
   phoneLink,
 }: MobileActionBarViewProps) {
+  const { t } = useLanguage();
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
-      <nav aria-label="Quick contact" className="grid grid-cols-2">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_3px_rgb(15_61_34/0.08)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+      <nav aria-label={t("mobile.quickContact")} className="grid grid-cols-2">
         <a
           href={whatsappLink}
           target="_blank"
@@ -23,14 +28,14 @@ function MobileActionBarView({
           className="flex h-14 items-center justify-center gap-2 bg-primary text-sm font-medium text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           <MessageCircle className="size-4" aria-hidden="true" />
-          WhatsApp
+          {t("mobile.whatsapp")}
         </a>
         <a
           href={phoneLink}
           className="flex h-14 items-center justify-center gap-2 border-l border-border text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           <Phone className="size-4" aria-hidden="true" />
-          Call
+          {t("mobile.call")}
         </a>
       </nav>
     </div>

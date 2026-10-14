@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 
 type SectionProps = {
   id?: string;
-  eyebrow?: string;
-  title: string;
+  eyebrow?: ReactNode;
+  title: ReactNode;
   description?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -21,11 +21,16 @@ function Section({
   headerClassName,
 }: SectionProps) {
   return (
-    <section id={id} className={cn("py-16 lg:py-20", className)}>
+    <section id={id} className={cn("scroll-mt-18 py-16 lg:py-20", className)}>
       <div className="mx-auto w-full max-w-6xl px-4">
-        <div className={cn("mb-10 max-w-2xl", headerClassName)}>
+        <div
+          className={cn(
+            "reveal mb-10 max-w-2xl sm:mb-12",
+            headerClassName,
+          )}
+        >
           {eyebrow ? (
-            <p className="mb-2 text-xs font-semibold tracking-wide text-brand uppercase">
+            <p className="mb-3 text-xs font-semibold tracking-[0.14em] text-brand uppercase">
               {eyebrow}
             </p>
           ) : null}
@@ -33,7 +38,7 @@ function Section({
             {title}
           </h2>
           {description ? (
-            <p className="mt-3 text-base text-muted-foreground text-pretty">
+            <p className="mt-4 max-w-[58ch] text-base leading-relaxed text-muted-foreground text-pretty">
               {description}
             </p>
           ) : null}

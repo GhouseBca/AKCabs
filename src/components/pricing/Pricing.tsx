@@ -3,20 +3,21 @@ import { PricingList } from "@/components/pricing/PricingList";
 import { PricingGridSkeleton } from "@/components/pricing/PricingGridSkeleton";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Section } from "@/components/ui/section";
+import { T } from "@/lib/i18n/T";
 
 export function Pricing() {
   return (
     <Section
       id="pricing"
-      eyebrow="Pricing"
-      title="Clear, upfront fares"
-      description="No surprises and no hidden charges. Choose the plan that suits your journey — or ask us for a custom quote."
-      className="bg-surface"
+      eyebrow={<T k="pricing.eyebrow" />}
+      title={<T k="pricing.title" />}
+      description={<T k="pricing.description" />}
+      className="bg-brand-tint"
     >
       <Suspense fallback={<PricingGridSkeleton />}>
         <ErrorBoundary
-          title="We couldn't load our pricing"
-          description="Please try again in a moment or request a quote on WhatsApp."
+          title={<T k="pricing.errorTitle" />}
+          description={<T k="pricing.errorDescription" />}
         >
           <PricingList />
         </ErrorBoundary>

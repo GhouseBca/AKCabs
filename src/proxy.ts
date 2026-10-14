@@ -4,15 +4,13 @@ import { authkit, handleAuthkitHeaders } from "@workos-inc/authkit-nextjs";
 /**
  * Next.js 16 Proxy (formerly Middleware).
  *
- * - Runs on /admin/* and /api/* so the WorkOS session is read/refreshed
- *   everywhere withAuth() might be called (pages, layouts, route handlers).
- * - Only /admin/* requires sign-in. /api/* stays public unless your own
- *   route handlers check the user themselves.
- * - /admin/login and its sign-in/sign-up route handlers stay reachable
- *   while logged out, otherwise we'd loop.
- * - /callback is intentionally outside the matcher.
+ * - Runs on every page (except static files and /callback) so withAuth() and
+ *   AuthKitProvider's server actions work on public pages too.
+ * - Only /admin/* requires sign-in. The rest of the site stays public.
+ * - /admin/login and its sign-in/sign-up route handlers stay reachable while
+ *   logged out, otherwise we'd loop.
  */
-const UNAUTHENTICATED_PREFIXES = ["/admin/login"];
+const PUBLIC_ADMIN_PREFIXES = ["/admin/login"];
 
 export default async function proxy(request: NextRequest) {
   const { session, headers, authorizationUrl } = await authkit(request, {
@@ -22,7 +20,7 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
-  const isPublicAdminPath = UNAUTHENTICATED_PREFIXES.some(
+  const isPublicAdminPath = PUBLIC_ADMIN_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
 
@@ -36,5 +34,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|callback|.*\\..*).*)"],
 };

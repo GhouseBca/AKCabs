@@ -6,7 +6,7 @@ function CarCardSkeleton({ className }: { className?: string }) {
     <div
       data-slot="car-card-skeleton"
       className={cn(
-        "flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-4 ring-1 ring-foreground/10",
+        "card-static flex flex-col gap-4 overflow-hidden p-4",
         className,
       )}
     >

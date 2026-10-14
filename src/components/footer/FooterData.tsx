@@ -6,11 +6,13 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { DEFAULT_SERVICES } from "@/lib/default-services";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneLink, getWhatsAppLink } from "@/lib/whatsapp";
 import { api } from "../../../convex/_generated/api";
 
 export function FooterData() {
   use(io());
+  const { t } = useLanguage();
   const settings = useQuery(api.settings.getBusinessSettings);
   const services = useQuery(api.services.getServices);
 
@@ -26,7 +28,9 @@ export function FooterData() {
   return (
     <>
       <div>
-        <h2 className="font-heading text-sm font-semibold">Services</h2>
+        <h2 className="font-heading text-sm font-semibold text-foreground">
+          {t("footer.services")}
+        </h2>
         <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
           {serviceTitles.slice(0, 6).map((title) => (
             <li key={title}>
@@ -42,7 +46,9 @@ export function FooterData() {
       </div>
 
       <div>
-        <h2 className="font-heading text-sm font-semibold">Contact</h2>
+        <h2 className="font-heading text-sm font-semibold text-foreground">
+          {t("footer.contact")}
+        </h2>
         <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
           <li>
             <a
@@ -52,7 +58,7 @@ export function FooterData() {
               className="inline-flex items-center gap-2 rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <MessageCircle className="size-4" aria-hidden="true" />
-              WhatsApp
+              {t("footer.whatsapp")}
             </a>
           </li>
           <li>
@@ -61,7 +67,7 @@ export function FooterData() {
               className="inline-flex items-center gap-2 rounded-lg transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <Phone className="size-4" aria-hidden="true" />
-              {phone || "Call us"}
+              {phone || t("footer.callUs")}
             </a>
           </li>
           {email ? (

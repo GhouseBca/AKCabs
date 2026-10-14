@@ -11,7 +11,7 @@ function ServicesGridSkeleton({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="flex flex-col gap-4 rounded-xl bg-card p-5 ring-1 ring-foreground/10"
+          className="card-static flex flex-col gap-4 p-5"
         >
           <Skeleton className="size-11 rounded-lg" />
           <Skeleton className="h-5 w-2/3" />

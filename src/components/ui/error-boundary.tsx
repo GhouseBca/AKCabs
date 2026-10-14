@@ -10,7 +10,7 @@ import { ErrorState } from "@/components/ui/error-state";
 
 type ErrorBoundaryProps = {
   children: ReactNode;
-  title?: string;
+  title?: ReactNode;
   description?: ReactNode;
   /** Called with the caught error and component stack (e.g. for logging). */
   onError?: (error: Error, info: ErrorInfo) => void;

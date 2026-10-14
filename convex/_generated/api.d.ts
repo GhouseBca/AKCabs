@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as cars from "../cars.js";
 import type * as enquiries from "../enquiries.js";
 import type * as pricing from "../pricing.js";
+import type * as reviews from "../reviews.js";
 import type * as seed from "../seed.js";
 import type * as services from "../services.js";
 import type * as settings from "../settings.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   cars: typeof cars;
   enquiries: typeof enquiries;
   pricing: typeof pricing;
+  reviews: typeof reviews;
   seed: typeof seed;
   services: typeof services;
   settings: typeof settings;

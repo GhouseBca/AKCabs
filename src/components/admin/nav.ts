@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Settings,
   Sparkles,
+  Star,
   Tags,
   type LucideIcon,
 } from "lucide-react";
@@ -39,6 +40,12 @@ export const ADMIN_NAV: AdminNavItem[] = [
     href: "/admin/enquiries",
     icon: Inbox,
     description: "Review and follow up on customer enquiries.",
+  },
+  {
+    label: "Reviews",
+    href: "/admin/reviews",
+    icon: Star,
+    description: "Approve and manage customer reviews.",
   },
   {
     label: "Services",

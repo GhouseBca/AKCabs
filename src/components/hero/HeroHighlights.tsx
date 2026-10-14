@@ -20,16 +20,16 @@ export function HeroHighlights() {
         return (
           <li
             key={service.title}
-            className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+            className="card-lift flex items-start gap-3.5 p-4"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-brand/10">
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <span className="space-y-1">
               <span className="block text-sm font-semibold">
                 {service.title}
               </span>
-              <span className="block text-sm text-muted-foreground">
+              <span className="block text-sm leading-relaxed text-muted-foreground">
                 {service.description}
               </span>
             </span>

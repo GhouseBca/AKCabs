@@ -179,16 +179,24 @@ export const getDashboardStats = queryGeneric({
   handler: async (ctx) => {
     await requireAdmin(ctx);
 
-    const [enquiries, cars, pricing, services] = await Promise.all([
+    const [enquiries, cars, pricing, services, reviews] = await Promise.all([
       ctx.db.query("enquiries").collect(),
       ctx.db.query("cars").collect(),
       ctx.db.query("pricing").collect(),
       ctx.db.query("services").collect(),
+      ctx.db.query("reviews").collect(),
     ]);
 
     const byStatus = { new: 0, contacted: 0, completed: 0, cancelled: 0 };
     for (const enquiry of enquiries) {
       byStatus[enquiry.status as keyof typeof byStatus] += 1;
+    }
+
+    const reviewsByStatus = { pending: 0, approved: 0, hidden: 0 };
+    for (const review of reviews) {
+      if (review.status in reviewsByStatus) {
+        reviewsByStatus[review.status as keyof typeof reviewsByStatus] += 1;
+      }
     }
 
     return {
@@ -210,6 +218,12 @@ export const getDashboardStats = queryGeneric({
       services: {
         total: services.length,
         active: services.filter((service) => service.active).length,
+      },
+      reviews: {
+        total: reviews.length,
+        pending: reviewsByStatus.pending,
+        approved: reviewsByStatus.approved,
+        hidden: reviewsByStatus.hidden,
       },
     };
   },

@@ -8,9 +8,13 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage, type TranslateVars } from "@/lib/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/en";
 import { cn, isValidPhone } from "@/lib/utils";
 import { getEnquiryLink, getWhatsAppLink } from "@/lib/whatsapp";
 import { api } from "../../../convex/_generated/api";
+
+type TranslateFn = (key: TranslationKey, vars?: TranslateVars) => string;
 
 type FormValues = {
   name: string;
@@ -45,39 +49,39 @@ const FIELD_ORDER: Array<keyof FormValues> = [
   "passengers",
 ];
 
-function validate(values: FormValues): FormErrors {
+function validate(values: FormValues, t: TranslateFn): FormErrors {
   const errors: FormErrors = {};
 
   if (!values.name.trim()) {
-    errors.name = "Please enter your name.";
+    errors.name = t("contact.form.errorName");
   }
 
   if (!values.phone.trim()) {
-    errors.phone = "Please enter your phone number.";
+    errors.phone = t("contact.form.errorPhone");
   } else if (!isValidPhone(values.phone)) {
-    errors.phone = "Please enter a valid phone number.";
+    errors.phone = t("contact.form.errorPhoneInvalid");
   }
 
   if (!values.pickupLocation.trim()) {
-    errors.pickupLocation = "Please enter a pickup location.";
+    errors.pickupLocation = t("contact.form.errorPickup");
   }
 
   if (!values.destination.trim()) {
-    errors.destination = "Please enter a destination.";
+    errors.destination = t("contact.form.errorDestination");
   }
 
   if (!values.travelDate.trim()) {
-    errors.travelDate = "Please choose a travel date.";
+    errors.travelDate = t("contact.form.errorDate");
   } else if (Number.isNaN(Date.parse(values.travelDate))) {
-    errors.travelDate = "Please enter a valid date.";
+    errors.travelDate = t("contact.form.errorDateInvalid");
   }
 
   if (!values.passengers.trim()) {
-    errors.passengers = "Please enter the number of passengers.";
+    errors.passengers = t("contact.form.errorPassengers");
   } else {
     const passengers = Number(values.passengers);
     if (!Number.isInteger(passengers) || passengers < 1 || passengers > 50) {
-      errors.passengers = "Enter a number between 1 and 50.";
+      errors.passengers = t("contact.form.errorPassengersRange");
     }
   }
 
@@ -100,7 +104,11 @@ function Field({
       <Label htmlFor={id}>{label}</Label>
       {children}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="text-xs text-destructive">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="text-xs leading-relaxed font-medium text-destructive"
+        >
           {error}
         </p>
       ) : null}
@@ -110,6 +118,7 @@ function Field({
 
 export function EnquiryForm() {
   use(io());
+  const { t } = useLanguage();
   const settings = useQuery(api.settings.getBusinessSettings);
   const createEnquiry = useMutation(api.enquiries.createEnquiry);
 
@@ -130,7 +139,7 @@ export function EnquiryForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextErrors = validate(values);
+    const nextErrors = validate(values, t);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -157,9 +166,7 @@ export function EnquiryForm() {
       setSubmitted(true);
     } catch (error) {
       setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again.",
+        error instanceof Error ? error.message : t("contact.form.error"),
       );
     } finally {
       setSubmitting(false);
@@ -182,17 +189,20 @@ export function EnquiryForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-xl bg-card p-6 text-center ring-1 ring-foreground/10">
+      <div className="card-static flex flex-col items-center gap-4 p-6 text-center">
         <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Check className="size-6" aria-hidden="true" />
         </span>
         <div className="space-y-1">
           <h3 className="font-heading text-xl font-semibold">
-            Thank you{values.name.trim() ? `, ${values.name.trim().split(" ")[0]}` : ""}!
+            {values.name.trim()
+              ? t("contact.form.thanksName", {
+                  name: values.name.trim().split(" ")[0],
+                })
+              : t("contact.form.thanks")}
           </h3>
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-            Your enquiry has been received. We&apos;ll get back to you shortly.
-            For a faster reply, message us on WhatsApp.
+            {t("contact.form.successDescription")}
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:flex-row">
@@ -203,7 +213,7 @@ export function EnquiryForm() {
             className={cn(buttonVariants({ size: "lg" }), "h-11 flex-1")}
           >
             <MessageCircle aria-hidden="true" />
-            Chat on WhatsApp
+            {t("contact.form.chatWhatsApp")}
           </a>
           <Button
             type="button"
@@ -217,7 +227,7 @@ export function EnquiryForm() {
               setSubmitted(false);
             }}
           >
-            Send another enquiry
+            {t("contact.form.sendAnother")}
           </Button>
         </div>
       </div>
@@ -228,23 +238,25 @@ export function EnquiryForm() {
     <form
       noValidate
       onSubmit={handleSubmit}
-      className="flex flex-col gap-5 rounded-xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6"
+      className="card-static reveal flex flex-col gap-5 p-5 sm:p-6"
     >
       <div className="space-y-1">
-        <h3 className="font-heading text-xl font-semibold">Send an enquiry</h3>
+        <h3 className="font-heading text-xl font-semibold">
+          {t("contact.form.title")}
+        </h3>
         <p className="text-sm text-muted-foreground">
-          Tell us about your trip and we&apos;ll confirm availability and fares.
+          {t("contact.form.description")}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="name" label="Full name" error={errors.name}>
+        <Field id="name" label={t("contact.form.name")} error={errors.name}>
           <Input
             id="name"
             name="name"
-            className="h-10"
+            className="h-11 px-3"
             autoComplete="name"
-            placeholder="Your name"
+            placeholder={t("contact.form.namePlaceholder")}
             value={values.name}
             onChange={(event) => handleChange("name", event.target.value)}
             aria-invalid={Boolean(errors.name)}
@@ -253,15 +265,15 @@ export function EnquiryForm() {
           />
         </Field>
 
-        <Field id="phone" label="Phone" error={errors.phone}>
+        <Field id="phone" label={t("contact.form.phone")} error={errors.phone}>
           <Input
             id="phone"
             name="phone"
             type="tel"
             inputMode="tel"
-            className="h-10"
+            className="h-11 px-3"
             autoComplete="tel"
-            placeholder="Your phone number"
+            placeholder={t("contact.form.phonePlaceholder")}
             value={values.phone}
             onChange={(event) => handleChange("phone", event.target.value)}
             aria-invalid={Boolean(errors.phone)}
@@ -272,14 +284,14 @@ export function EnquiryForm() {
 
         <Field
           id="pickupLocation"
-          label="Pickup location"
+          label={t("contact.form.pickup")}
           error={errors.pickupLocation}
         >
           <Input
             id="pickupLocation"
             name="pickupLocation"
-            className="h-10"
-            placeholder="e.g. Tirunelveli Junction"
+            className="h-11 px-3"
+            placeholder={t("contact.form.pickupPlaceholder")}
             value={values.pickupLocation}
             onChange={(event) =>
               handleChange("pickupLocation", event.target.value)
@@ -292,12 +304,16 @@ export function EnquiryForm() {
           />
         </Field>
 
-        <Field id="destination" label="Destination" error={errors.destination}>
+        <Field
+          id="destination"
+          label={t("contact.form.destination")}
+          error={errors.destination}
+        >
           <Input
             id="destination"
             name="destination"
-            className="h-10"
-            placeholder="e.g. Kanyakumari"
+            className="h-11 px-3"
+            placeholder={t("contact.form.destinationPlaceholder")}
             value={values.destination}
             onChange={(event) => handleChange("destination", event.target.value)}
             aria-invalid={Boolean(errors.destination)}
@@ -308,12 +324,16 @@ export function EnquiryForm() {
           />
         </Field>
 
-        <Field id="travelDate" label="Travel date" error={errors.travelDate}>
+        <Field
+          id="travelDate"
+          label={t("contact.form.travelDate")}
+          error={errors.travelDate}
+        >
           <Input
             id="travelDate"
             name="travelDate"
             type="date"
-            className="h-10"
+            className="h-11 px-3"
             value={values.travelDate}
             onChange={(event) => handleChange("travelDate", event.target.value)}
             aria-invalid={Boolean(errors.travelDate)}
@@ -324,7 +344,11 @@ export function EnquiryForm() {
           />
         </Field>
 
-        <Field id="passengers" label="Passengers" error={errors.passengers}>
+        <Field
+          id="passengers"
+          label={t("contact.form.passengers")}
+          error={errors.passengers}
+        >
           <Input
             id="passengers"
             name="passengers"
@@ -332,8 +356,8 @@ export function EnquiryForm() {
             inputMode="numeric"
             min={1}
             max={50}
-            className="h-10"
-            placeholder="e.g. 4"
+            className="h-11 px-3"
+            placeholder={t("contact.form.passengersPlaceholder")}
             value={values.passengers}
             onChange={(event) => handleChange("passengers", event.target.value)}
             aria-invalid={Boolean(errors.passengers)}
@@ -345,23 +369,24 @@ export function EnquiryForm() {
         </Field>
       </div>
 
-      <Field id="preferredCar" label="Preferred car (optional)">
+      <Field id="preferredCar" label={t("contact.form.preferredCar")}>
         <Input
           id="preferredCar"
           name="preferredCar"
-          className="h-10"
-          placeholder="e.g. Innova, Sedan"
+          className="h-11 px-3"
+          placeholder={t("contact.form.preferredCarPlaceholder")}
           value={values.preferredCar}
           onChange={(event) => handleChange("preferredCar", event.target.value)}
         />
       </Field>
 
-      <Field id="message" label="Message (optional)">
+      <Field id="message" label={t("contact.form.message")}>
         <Textarea
           id="message"
           name="message"
           rows={4}
-          placeholder="Anything else we should know?"
+          className="px-3"
+          placeholder={t("contact.form.messagePlaceholder")}
           value={values.message}
           onChange={(event) => handleChange("message", event.target.value)}
         />
@@ -370,7 +395,7 @@ export function EnquiryForm() {
       {submitError ? (
         <p
           role="alert"
-          className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
         >
           {submitError}
         </p>
@@ -379,7 +404,7 @@ export function EnquiryForm() {
       <Button
         type="submit"
         size="lg"
-        className="h-11 w-full"
+        className="h-11 w-full gap-2 rounded-xl shadow-sm shadow-brand/20 transition-shadow hover:shadow-md hover:shadow-brand/25"
         disabled={submitting}
       >
         {submitting ? (
@@ -387,12 +412,12 @@ export function EnquiryForm() {
         ) : (
           <Send className="size-4" aria-hidden="true" />
         )}
-        {submitting ? "Sending…" : "Send enquiry"}
+        {submitting ? t("contact.form.sending") : t("contact.form.submit")}
       </Button>
 
-      <div className="flex flex-col gap-2 rounded-lg bg-muted/60 p-3">
+      <div className="flex flex-col gap-2 rounded-xl border border-brand/15 bg-brand/5 p-4">
         <p className="text-sm text-muted-foreground">
-          Prefer WhatsApp? Send the same details in one tap.
+          {t("contact.form.preferWhatsApp")}
         </p>
         <a
           href={whatsappLink}
@@ -404,7 +429,7 @@ export function EnquiryForm() {
           )}
         >
           <MessageCircle aria-hidden="true" />
-          Enquire on WhatsApp
+          {t("contact.form.enquireWhatsApp")}
         </a>
       </div>
     </form>

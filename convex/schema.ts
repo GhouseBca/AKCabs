@@ -15,6 +15,12 @@ export const enquiryStatus = v.union(
   v.literal("cancelled"),
 );
 
+export const reviewStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("hidden"),
+);
+
 export const adminRole = v.union(v.literal("admin"), v.literal("staff"));
 
 export default defineSchema({
@@ -80,6 +86,17 @@ export default defineSchema({
     preferredCar: v.string(),
     message: v.string(),
     status: enquiryStatus,
+    createdAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"]),
+
+  reviews: defineTable({
+    name: v.string(),
+    rating: v.number(),
+    comment: v.string(),
+    location: v.optional(v.string()),
+    status: reviewStatus,
     createdAt: v.number(),
   })
     .index("by_status", ["status"])
